@@ -58,6 +58,10 @@ public class UserRequest {
                 throw new IllegalArgumentException("비밀번호는 필수 입니다");
             }
 
+            if(password.length() < 4 || password.length() > 255) {
+                throw new IllegalArgumentException("비밀번호는 최소 4글자 이상 이어야 합니다.");
+            }
+
             if(email == null || email.trim().isEmpty()) {
                 throw new IllegalArgumentException("이메을은 필수 입니다");
             }
