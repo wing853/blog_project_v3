@@ -39,11 +39,15 @@ public class UserController {
     @Value("${oauth.kakao.client-secret}")
     private String kakaoClientSecret;
 
+    @Value("${tenco.key}")
+    private String tencoKey;
+
     // 테스트 용 <-- 서버가 실행되면 한번 이 메서드 호출해
     @PostConstruct
     public void init() {
         log.info("현재 적용된 클라이언트 아이디 확인 : " + kakaoClientId);
         log.info("현재 적용된 클라이언트 시크릿 확인 : " + kakaoClientSecret);
+        log.info("현재 적용된 텐코 키 확인: " + tencoKey);
     }
 
     // 1. 인가 코드 받음 -> 2. 토큰 발급 요청(JWT - CSR)

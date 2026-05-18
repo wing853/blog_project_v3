@@ -136,4 +136,10 @@ public class User {
         return "/images/" + this.profileImage;
     }
 
+    // 머스태치 화면에서 사용할 편의 메서드 3
+    public boolean isLocal() {
+        // true -> 이메일 가입자를 의미
+        return this.oAuthProvider == OAuthProvider.LOCAL;
+    }
+
 }

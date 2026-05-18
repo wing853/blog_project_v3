@@ -65,6 +65,7 @@ public class UserService {
         user.setPassword(hashPwd);
         // 기본 권한 추가 (일반 사용자로 설정)
         user.addRole(Role.USER);
+        user.setOAuthProvider(OAuthProvider.LOCAL);
 
         return userRepository.save(user);
     }

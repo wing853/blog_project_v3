@@ -11,12 +11,14 @@
                       style="width:200px; height:200px"/>
                 <!--  회원 가입시 소셜 가입자               -->
 
+                {{#user.local}}
                     <div class="mt-2">
                         <form action="/user/profile-image/delete" method="post">
                             <button type="submit" class="btn btn-sm btn-danger"
                             onclick="return confirm('프로필 사진을 삭제할까요?')">프로필 사진 삭제</button>
                         </form>
                     </div>
+                {{/user.local}}
                 {{/user.profileImage}}
                 {{^user.profileImage}}
                     <div class="rounded-circle bg-secondary d-inline-flex

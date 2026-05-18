@@ -9,12 +9,14 @@
                 {{#user.profileImage}}
                     <img class="rounded-circle" src="{{user.profilePath}}" alt="프로필이미지"
                          style="width:200px; height:200px"/>
+                    {{#user.local}}
                     <div class="mt-2">
                         <form action="/user/profile-image/delete" method="post">
                             <button type="submit" class="btn btn-sm btn-danger"
                                     onclick="return confirm('프로필 사진을 삭제할까요?')">프로필 사진 삭제</button>
                         </form>
                     </div>
+                    {{/user.local}}
                 {{/user.profileImage}}
                 {{^user.profileImage}}
                     <div class="rounded-circle bg-secondary d-inline-flex
@@ -31,14 +33,17 @@
                 <div class="mb-3">
                     <input type="text" class="form-control" name="username" value="{{user.username}}" disabled>
                 </div>
+                {{#user.local}}
                 <div class="mb-3">
                     <input type="password" class="form-control" name="password" value="" >
                 </div>
+
                 {{#user.email}}
                 <div class="mb-3">
                     <input type="text" class="form-control" name="email" value="{{user.email}}" disabled>
                 </div>
                 {{/user.email}}
+
 
                 <!--  프로필 이미지 등록 필드(선택 사항)  -->
                 <div class="mb-3">
@@ -47,7 +52,7 @@
                     <small class="form-text text-muted">이미지 파일만 업로드 가능합니다(JPG, PNG, GIF 등)</small>
                     <small class="form-text text-muted d-block mt-1">⭐ 프로필 사진을 등록하지 않아도 회원 가입 가능 </small>
                 </div>
-
+                {{/user.local}}
                 <button class="btn btn-primary form-control">회원정보수정</button>
             </form>
         </div>
