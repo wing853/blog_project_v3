@@ -74,6 +74,7 @@ public class UserRequest {
 
         private String password;
         private MultipartFile profileImage;
+        private String profileImageName;
 
         public void validate() {
             if(password == null || password.isBlank()) {

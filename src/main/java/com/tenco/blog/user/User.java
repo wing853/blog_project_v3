@@ -81,10 +81,28 @@ public class User {
     }
 
     // 편의 기능 추가 - 회원 정보 수정
-    public void update(UserRequest.UpdateDTO updateDTO, String newProfileImageFileName) {
-        this.password = updateDTO.getPassword();
-        this.profileImage = newProfileImageFileName;
+    public void update(UserRequest.UpdateDTO updateDTO) {
+        if(updateDTO.getPassword() != null) {
+            this.password = updateDTO.getPassword();
+        }
+
+        if (updateDTO.getProfileImageName() != null) {
+            this.profileImage = updateDTO.getProfileImageName();
+        }
+
     }
+
+
+//    // 편의 기능 추가 - 회원 정보 수정
+//    public void update(UserRequest.UpdateDTO updateDTO, String newProfileImageFileName) {
+//        this.password = updateDTO.getPassword();
+//        this.profileImage = newProfileImageFileName;
+//    }
+//
+//    public void update(UserRequest.UpdateDTO updateDTO) {
+//        this.password = updateDTO.getPassword();
+//
+//    }
 
 
     // ==  User 엔티티에 권한 관련 편의 기능 만들기 보기 ==
