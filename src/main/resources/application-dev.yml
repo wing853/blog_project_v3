@@ -1,5 +1,8 @@
 server:
   servlet:
+    session:
+      # URL에 jsesionid가 노출 되는 것 방지
+      tracking-modes: cookie
     encoding:
       charset: utf-8
       force: true

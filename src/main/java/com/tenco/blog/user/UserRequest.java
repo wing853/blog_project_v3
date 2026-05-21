@@ -63,7 +63,7 @@ public class UserRequest {
             }
 
             if(email == null || email.trim().isEmpty()) {
-                throw new IllegalArgumentException("이메을은 필수 입니다");
+                throw new IllegalArgumentException("이메일은 필수 입니다");
             }
             // 입력값 : abc@naver.com --> contains() -->   true   --> ! --> false
             if(email.contains("@") == false) {

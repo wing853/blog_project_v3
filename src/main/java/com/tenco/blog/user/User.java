@@ -71,13 +71,21 @@ public class User {
     @Builder
     public User(Integer id, String username, String password,
                 String email, Timestamp createdAt,
-                String profileImage) {
+                String profileImage,OAuthProvider oAuthProvider,List<UserRole> roles) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
         this.createdAt = createdAt;
         this.profileImage = profileImage;
+        this.oAuthProvider = (oAuthProvider != null) ? oAuthProvider : OAuthProvider.LOCAL;
+
+        // 1. roles(ArrayList타입)가 빈 리스토로 초기화 (NPE방지 처리)
+        this.roles = (roles != null) ? roles : new ArrayList<>();
+        // 2. roles 가 비어있으면 USER 기본 권한 자동 설정
+        if(this.roles.isEmpty()) {
+            this.roles.add(UserRole.builder().role(Role.USER).build());
+        }
     }
 
     // 편의 기능 추가 - 회원 정보 수정
