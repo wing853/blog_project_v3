@@ -4,6 +4,7 @@ import com.tenco.blog._core.errors.Exception400;
 import com.tenco.blog._core.errors.Exception403;
 import com.tenco.blog._core.errors.Exception404;
 import com.tenco.blog._core.util.FileUtil;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,8 @@ public class UserService {
     // DI
     private final PasswordEncoder passwordEncoder;
 
+    private final HttpSession session;
+
     // 초기 파미미터 값을 가져 오는 방법
     @Value("${oauth.kakao.client-id}")
     private String kakaoClientId;
@@ -54,9 +57,29 @@ public class UserService {
      */
     @Transactional
     public User 회원가입(UserRequest.JoinDTO joinDTO) {
+        log.info("회원가입 서비스 시작");
+        // [핵심] 이메일 인증 도장 확인
+        String verifiedEmail = (String) session.getAttribute("verified_email");
+
+        if(verifiedEmail == null || !verifiedEmail.equals(joinDTO.getEmail())) {
+            // 이메일 위변조를 방지하기위해 인증번호 검증시 넣었던 그 이메일을 진행시켜야 한다.
+            throw new Exception400("이메일 인증을 완료해 주세요");
+        }
 
         userRepository.findByUsername(joinDTO.getUsername()).ifPresent(
-                user -> new Exception400("중복된 사용자 명입니다.")
+                user -> {
+                    log.warn("회원가입 실패 - 중복된 사용자명: {} ",user.getUsername());
+                    throw new Exception400("중복된 사용자 명입니다.");
+                }
+        );
+
+        // 중복 이메일 체크
+        // ifPresent -> 값이 존재하면 괄호안에 코드를 수행해
+        userRepository.findByEmail(joinDTO.getEmail()).ifPresent(
+                user -> {
+                    log.warn("회원가입 실패 - 중복된 이메일: {} ",user.getEmail());
+                    throw new Exception400("이미 존재하는 이메일입니다.");
+                }
         );
 
         String profileImage = null;
@@ -77,6 +100,9 @@ public class UserService {
 
         User user = joinDTO.toEntity(profileImage);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // 이메일 인증 도장 삭제
+        session.removeAttribute("verified_email");
         return userRepository.save(user);
     }
 
@@ -299,6 +325,16 @@ public class UserService {
     }
 
 
+    @Transactional
+    public User 포인트충전(Integer id, Integer amount) {
+        // id값으로 db에 User 정보 조회
+        User userEntity = userRepository.findById(id).orElseThrow(
+                () -> new Exception404("사용자를 찾을 수 없습니다.")
+        );
+        userEntity.chargePoint(amount);
+
+        return userRepository.save(userEntity);
+    }
 }
 
 

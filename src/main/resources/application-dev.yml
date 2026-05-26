@@ -74,3 +74,37 @@ spring:
 
     # data.sql 파일을 Hibernate 초기화 이후에 실행
     defer-datasource-initialization: true
+
+  mail:
+    # SMTP 서버 호스트 주소 (Google의 경우 smtp.gmail.com 고정)
+    host: smtp.gmail.com
+    # SMTP 서버 포트 번호 (587: TLS(Transport Layer Security) 암호화 통신 전용 포트)
+    # 인터넷으로 정보를 주고받을 때 정보를 암호화해서 아무도 훔쳐보지 못하게 하는 보안 기술
+    port: 587
+    # 발신자 계정 (본인의 전체 Gmail 주소)
+    username: vbqp151626@gmail.com
+    # 발신자 인증 키 (Google 보안 설정에서 생성한 16자리 앱 비밀번호)
+    # 주의: 일반 구글 로그인 비밀번호가 아님
+    password: eytlpcaddbtghkqd
+    # JavaMail 추가 속성 설정
+    properties:
+      mail:
+        smtp:
+          # SMTP 서버 인증 활성화 (ID/PW 검사 여부)
+          auth: true
+          # STARTTLS 설정 (보안 연결)
+          starttls:
+            # 비암호화 연결을 암호화 연결(TLS)로 승격 활성화
+            enable: true
+            # TLS 연결을 강제할지 여부 (보안상 true 권장)
+            required: true
+          # [타임아웃 설정 - 서버 간 통신 기준]
+          # 소켓 연결 제한 시간 (단위: 밀리초)
+          # 서버에 접속을 시도할 때 5초(5000ms) 동안 응답이 없으면 연결 실패 처리
+          connectiontimeout: 5000
+          # 소켓 읽기 제한 시간 (단위: 밀리초)
+          # 메일 전송 요청 후 서버로부터 응답(Response)을 기다리는 최대 시간
+          timeout: 5000
+          # 소켓 쓰기 제한 시간 (단위: 밀리초)
+          # 데이터를 서버로 전송할 때 걸리는 최대 허용 시간
+          writetimeout: 5000

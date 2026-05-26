@@ -11,28 +11,131 @@
                 (form 태그 사용시 서버측으로 파일 데이터를 보내는 방법)
 
             -->
-            <form action="/join" method="post" enctype="multipart/form-data">
+            <form action="/join" method="post" enctype="multipart/form-data" onsubmit="return checkVerify()">
                 <div class="mb-3">
                     <input type="text" class="form-control" placeholder="enter username" name="username" value="cos5">
                 </div>
                 <div class="mb-3">
-                    <input type="password" class="form-control" placeholder="enter password" name="password" value="1234">
+                    <input type="password" class="form-control" placeholder="enter password" name="password"
+                           value="1234">
                 </div>
+
                 <div class="mb-3">
-                    <input type="email" class="form-control" placeholder="enter email" name="email" value="aa@naver.com">
+                    <label for="" class="form-label">이메일</label>
+                    <div class="input-group">
+                        <input type="email" class="form-control email" placeholder="enter email" name="email"
+                               value="qwqhsk@naver.com" required>
+                        <button type="button" class="btn btn-outline-secondary" onclick="callSendApi()">인증번호 전송</button>
+                    </div>
                 </div>
+
+                <!--인증 번호 입력(처음에 숨김, 발송 후 보임)-->
+                <div class="mb-3" id="code-box" style="display:none">
+                    <label for="" class="form-label">인증번호</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="code" placeholder="인증번호 6자리" maxlength="6">
+                        <button type="button" class="btn btn-outline-secondary" onclick="callVerifyApi()">확인</button>
+                    </div>
+                    <div id="msg"></div>
+                </div>
+
+                <!--인증 완료 여부 저장 필드(hidden 필드)-->
+                <input type="hidden" id="isEmailVerified" value="false">
+
                 <!--  프로필 이미지 등록 필드(선택 사항)  -->
                 <div class="mb-3">
                     <label for="profileImage" class="form-label">프로필 사진(선택사항)</label>
-                    <input type="file" id="profileImage" class="form-control" name="profileImage" accept="image/*"  >
+                    <input type="file" id="profileImage" class="form-control" name="profileImage" accept="image/*">
                     <small class="form-text text-muted">이미지 파일만 업로드 가능합니다(JPG, PNG, GIF 등)</small>
                     <small class="form-text text-muted d-block mt-1">⭐ 프로필 사진을 등록하지 않아도 회원 가입 가능 </small>
                 </div>
-                
-                <button type="submit" class="btn btn-primary form-control">회원가입</button>
+
+                <button type="submit" class="btn btn-primary form-control" id="onSubmit">회원가입</button>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    // 1. 인증번호 메일 발송 Api
+    async function callSendApi() {
+        const email = document.querySelector(".email").value;
+
+        if (email == false) {
+            alert("이메일을 입력해주세요.");
+            return;
+        }
+
+        const response = await fetch("/api/email/send", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=UTF-8",
+            },
+            body: JSON.stringify({
+                email: email
+            })
+        });
+
+        if (response.ok) {
+            alert("인증 번호가 발송 되었습니다. 메일 함을 확인하세요.");
+            // 인증 번호 입력창 노출
+            document.querySelector("#code-box").style.display = "block";
+        } else {
+            let error = await response.json();
+            alert("실패" + error.message);
+        }
+
+    } // end of callSendApi
+
+    // 2. 인증번호 검증 Api
+    async function callVerifyApi() {
+        const email = document.querySelector(".email").value;
+        const code = document.querySelector("#code").value;
+
+        if(code == false || email == false) {
+            alert("이메일 또는 인증 코드가 필요합니다.")
+            return;
+        }
+
+        try {
+             const response = await fetch("/api/email/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json; charset=UTF-8",
+                },
+                body: JSON.stringify({
+                    email: email,
+                    code: code,
+                }),
+            });
+
+            const result = await response.json();
+            const msgElement = document.querySelector("#msg");
+            if(response.ok) {
+                // 인증 성공
+                msgElement.innerHTML =`<span style='color: green'>${result.message}</span>`
+                document.querySelector("#isEmailVerified").value = "true";
+                // 이메일 인증 성공후 사용자가 값을 변경 못하게 1단계 처리
+                 document.querySelector(".email").readOnly = true;
+            } else {
+                msgElement.innerHTML =`<span style='color: red'>${result.message}</span>`
+            }
+
+        } catch(error) {
+            alert("인증 실패: " + error.message);;
+        }
+    }
+
+    // 3. 회원가입 폼 제출 시 최종 체크
+    function checkVerify() {
+        let isVerified = document.querySelector("#isEmailVerified").value;
+        if(isVerified === "false") {
+            alert("이메일 인증을 먼저 완료해 주세요")
+            return false;
+        }
+        return true;
+    }
+
+</script>
 {{> layout/footer}}
 

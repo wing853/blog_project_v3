@@ -23,11 +23,17 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     //   - 해당 ID를 가진 데이터가 있는지 확인하여 boolean을 반환
 
 
-    // 사용자명으로 사용자 조회(중복 체크 확인 용)
+    // 사용자명으로 사용자 조회(중복 체크 확용)
     @Query("""
         SELECT u FROM User u WHERE u.username = :username
     """)
     Optional<User> findByUsername(@Param("username") String username);
+
+    // 이메일 조회(중복 체크 확인용)
+    @Query("""
+        SELECT u FROM User u WHERE u.email = :email
+    """)
+    Optional<User> findByEmail(@Param("email") String email);
 
     // 사용자명과 비밀번호로 사용자 조회(로그인용)
     @Query("""
@@ -44,18 +50,18 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     // 사용자명과 비밀번호로 사용자 조회(로그인용) + Role 정보 한번에 조회
     @Query("""
-         SELECT distinct u FROM User u 
+         SELECT distinct u FROM User u
          LEFT JOIN FETCH  u.roles r
-         WHERE u.username = :username AND u.password = :password        
+         WHERE u.username = :username AND u.password = :password
     """)
     Optional<User> findByUsernameAndPasswordWithRoles(@Param("username") String username,
                                              @Param("password")  String password);
 
     // 암호화 처리시 사용자의 이름만 받을 수 있도록 쿼리를 수정한다.
     @Query("""
-         SELECT distinct u FROM User u 
+         SELECT distinct u FROM User u
          LEFT JOIN FETCH  u.roles r
-         WHERE u.username = :username         
+         WHERE u.username = :username
     """)
     Optional<User> findByUsernameWithRoles(@Param("username") String username);
 

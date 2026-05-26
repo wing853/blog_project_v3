@@ -1,5 +1,6 @@
 package com.tenco.blog.user;
 
+import com.tenco.blog._core.errors.Exception400;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -25,13 +26,15 @@ public class User {
     private String username;
 
     private String password;
+    // 물리적으로 중복값 등록 방지
+    @Column(unique = true)
     private String email;
     // 엔티티가 영속화 될 때 자동으로 현재 시간을 주입해라 pc -> db
     @CreationTimestamp
     private Timestamp createdAt;
 
     // User 테이블에는 이미지 파일명만 저장할 예정 (실제 데이터는 내 서버 컴퓨터 로컬에 저장할 예정)
-    @Column(nullable =  true) // null 허용, 기본값
+    @Column(nullable = true) // null 허용, 기본값
     private String profileImage;  // 프로필 이미지는 선택 사항(회원 가입 시)
 
     // User : UserRole 연관 관계를 단방향 1 : N 구조 설계
@@ -43,18 +46,18 @@ public class User {
     /**
      * 사용자 권한 목록
      * User (1) : UserRole (N) 연관 관계를 정의 함
-     *
+     * <p>
      * 1. @OneToMany + @JoinColumn(name ="user_id")
      * - User 가 UserRole 리스트를 관리 합니다. (단방향)
      * - 실제 DB user_role_tb 테이블에 FK 컬럼은 user_id 명이 user_role_tb 생성 된다.
-     *
+     * <p>
      * 2. CascadeType.ALL (운명 공동체)
      * Java 기준에서 User 저장하면 Role 도 자동 저장되고, User 삭제하면 가지고 있던
      * Role들도 다 삭제가 됩니다. DB 에서 실제 delete 쿼리가 발생 됩니다.
-     *
+     * <p>
      * 3. orphanRemoval (리스와 DBㄹ르 동기화)
-     *  DB 에서 실제 delete 쿼리가 발생 됩니다. = true 처리
-     *
+     * DB 에서 실제 delete 쿼리가 발생 됩니다. = true 처리
+     * <p>
      * 4. fetch = FetchType.EAGER (특별취급)
      * 데이터 양이 얼마 되지 않습니다. 그래서 한번에 데이터를 채워서 가지고 오는것이
      * 편리하다
@@ -68,10 +71,15 @@ public class User {
     @ColumnDefault("'LOCAL'") // 어노테이션으로 디폴트값 선언 방법 ( 문자열 일 경우 ' ' 반드시 사용)
     private OAuthProvider oAuthProvider;
 
+    // 보유 포인트
+    @ColumnDefault("0") // 테이블 기준 기본값 설정
+    private Integer point = 0;
+
     @Builder
     public User(Integer id, String username, String password,
                 String email, Timestamp createdAt,
-                String profileImage,OAuthProvider oAuthProvider,List<UserRole> roles) {
+                String profileImage, OAuthProvider oAuthProvider
+            , List<UserRole> roles, Integer point) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -83,14 +91,17 @@ public class User {
         // 1. roles(ArrayList타입)가 빈 리스토로 초기화 (NPE방지 처리)
         this.roles = (roles != null) ? roles : new ArrayList<>();
         // 2. roles 가 비어있으면 USER 기본 권한 자동 설정
-        if(this.roles.isEmpty()) {
+        if (this.roles.isEmpty()) {
             this.roles.add(UserRole.builder().role(Role.USER).build());
         }
+
+        // 포인트가 null이면 기본값 0으로 설정
+        this.point = (point != null) ? point : 0;
     }
 
     // 편의 기능 추가 - 회원 정보 수정
     public void update(UserRequest.UpdateDTO updateDTO) {
-        if(updateDTO.getPassword() != null) {
+        if (updateDTO.getPassword() != null) {
             this.password = updateDTO.getPassword();
         }
 
@@ -130,8 +141,8 @@ public class User {
             // Role(해당 유저에 권한이) 자체가 설정 되지 않은 상태
             return false;
         }
-        for(UserRole userRole: this.roles) {
-            if(userRole.getRole() == role) {
+        for (UserRole userRole : this.roles) {
+            if (userRole.getRole() == role) {
                 return true;
             }
         }
@@ -151,11 +162,11 @@ public class User {
     // 머스태치 화면에서 사용할 편의 메서드 2
     // OAuthProvider 값에 따라서 경로 변수를 다르게 리턴
     public String getProfilePath() {
-        if(this.profileImage == null) {
+        if (this.profileImage == null) {
             return null;
         }
         // 이미지 경로가 http 로 시작 (소셜 가입)
-        if(this.profileImage.startsWith("http")) {
+        if (this.profileImage.startsWith("http")) {
             return this.profileImage;
         }
         // 로컬 이미지(서버 기준 경로)
@@ -168,4 +179,24 @@ public class User {
         return this.oAuthProvider == OAuthProvider.LOCAL;
     }
 
+    // 포인트 관련 편의 메서드 추가
+    public void deductPoint(Integer amount) {
+        if (amount == null || amount <= 0) {
+            throw new Exception400("차감할 포인트는 0보다 커야합니다");
+        }
+
+        if (this.point < amount) {
+            throw new Exception400("포인트가 부족합니다. 현재포인트: " + this.point);
+        }
+
+        this.point -= amount;
+    }
+
+    public void chargePoint(Integer amount) {
+        if (amount == null || amount <= 0) {
+            throw new Exception400("충전할 포인트는 0보다 커야합니다.");
+        }
+
+        this.point += amount;
+    }
 }
