@@ -5,19 +5,30 @@
         <div class="card-body">
             <!--  익명 게시글 작성    -->
             <form action="/board/{{id}}/update" method="post">
+
                 <div class="mb-3">
                     <input type="text" name="username"  class="form-control"
                            placeholder="enter username" value="{{board.username}}" readonly>
                 </div>
+
                 <div class="mb-3">
                     <input type="text" name="title" class="form-control"
                            placeholder="enter title" value="{{board.title}}">
                 </div>
+
                 <div class="mb-3">
                     <textarea type="text" name="content" rows="5" class="form-control" placeholder="enter title">
                         {{board.content}}
                     </textarea>
                 </div>
+
+                <div class="mb-3">
+                    <!--board.premium 컬럼 추가시 주석 해제 -->
+                    <input type="checkbox" id="premium" name="premium" value="true" class="form-check-input"
+                    {{#board.premium}}checked{{/board.premium}}>
+                    <label for="premium" class="form-check-label">유료 게시글 등록(열람시 500포인트 차감 됨)</label>
+                </div>
+
                 <button class="btn btn-primary">글수정 완료</button>
             </form>
         </div>

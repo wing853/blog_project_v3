@@ -85,7 +85,7 @@ spring:
     username: vbqp151626@gmail.com
     # 발신자 인증 키 (Google 보안 설정에서 생성한 16자리 앱 비밀번호)
     # 주의: 일반 구글 로그인 비밀번호가 아님
-    password: eytlpcaddbtghkqd
+    password: ${GOOGLE_SECRET_KEY}
     # JavaMail 추가 속성 설정
     properties:
       mail:

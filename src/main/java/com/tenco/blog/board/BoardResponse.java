@@ -48,15 +48,23 @@ public class BoardResponse {
         private String username;
         private Integer userId; //  user PK
         private boolean isOwner;
+        private Boolean isPremium; // 유료 게시글 여부
+        private Boolean isPurchased; // 현재 로그인 사용자의 구매 여부
 
         public DetailDTO(Board board) {
             this.id = board.getId();
             this.title = board.getTitle();
             this.content = board.getContent();
+            this.isPremium = board.getPremium();
             if(board.getUser() != null) {
                 this.username = board.getUser().getUsername();
                 this.userId = board.getUser().getId();
             }
+        }
+
+        public DetailDTO(Board board, Boolean purchased) {
+            this(board);
+            this.isPurchased = purchased;
         }
 
         // 소유자 확인
