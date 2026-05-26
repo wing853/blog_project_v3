@@ -19,6 +19,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 // @RestControllerAdvice // 에러를 데이터로 반환할 때 사용
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(NotEnoughException.class)
+    @ResponseBody
+    public String handleNotEnoughException(NotEnoughException e, HttpServletRequest request) {
+        log.warn("=== 포인트 부족 예외 처리 ===");
+        log.warn("요청 URL: {}", request.getRequestURL());
+        log.warn("에러메시지: {}", e.getMessage());
+
+        String message = e.getMessage() != null ? e.getMessage() : "포인트가 부족합니다.";
+        String escapeMessage = message.replace("'", "\\'");
+        return """
+                <script>
+                  alert('%s');
+                  location.href = '/user/detail'
+                </script>
+                """.formatted(escapeMessage);
+    }
+
     @ExceptionHandler(Exception400.class)
     @ResponseBody
     public String ex400(Exception400 e, HttpServletRequest request) {
